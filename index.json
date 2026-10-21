@@ -1,0 +1,121 @@
+[
+  {
+    "category": "song",
+    "id": "the-luong-phuc-chinh",
+    "name": "Thê Lương - Phúc Chinh",
+    "path": "songs/01-the-luong-phuc-chinh.mp3",
+    "tags": [
+      "Phúc Chinh",
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "bai-ca-dao-dau-roi",
+    "name": "Bài ca dao đâu rồi - Quang Linh",
+    "path": "songs/02-bai-ca-dao-dau-roi.mp3",
+    "tags": [
+      "Quang Linh",
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "bien-noi-nho-va-em",
+    "name": "Biển nỗi nhớ và em - Đàm Vĩnh Hưng",
+    "path": "songs/03-bien-noi-nho-va-em.mp3",
+    "tags": [
+      "Đàm Vĩnh Hưng",
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "bong-do-cap-ngang-ben-song",
+    "name": "Bóng đò cập ngang bến sông - Trần Quang Huy Cover",
+    "path": "songs/04-bong-do-cap-ngang-ben-song.mp3",
+    "tags": [
+      "Trần Quang Huy",
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "buoc-chan-le-loi",
+    "name": "Bước chân lẻ loi - Đan Trường",
+    "path": "songs/05-buoc-chan-le-loi.mp3",
+    "tags": [
+      "Đan Trường",
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "cam-on-mot-niem-dau",
+    "name": "Cảm ơn một niềm đau - Đàm Vĩnh Hưng",
+    "path": "songs/06-cam-on-mot-niem-dau.mp3",
+    "tags": [
+      "Đàm Vĩnh Hưng",
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "cho-vua-long-em",
+    "name": "Cho vừa lòng em - Đàm Vĩnh Hưng",
+    "path": "songs/07-cho-vua-long-em.mp3",
+    "tags": [
+      "Đàm Vĩnh Hưng",
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "lien-khuc-mai-lo-minh-xa-nhau",
+    "name": "Liên khúc Mai lỡ mình xa nhau & Đừng nói xa nhau",
+    "path": "songs/08-lien-khuc-mai-lo-minh-xa-nhau.mp3",
+    "tags": [
+      "Chế Linh",
+      "Thanh Tuyền",
+      "liên khúc"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "mot-minh",
+    "name": "Một mình",
+    "path": "songs/09-mot-minh.mp3",
+    "tags": [
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "nhu-mot-giac-mo",
+    "name": "Như một giấc mơ (Xin đừng khóc)",
+    "path": "songs/10-nhu-mot-giac-mo.mp3",
+    "tags": [
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "ha-noi-run-run-heo-may",
+    "name": "Hà Nội run run heo may - Tuấn Hiệp",
+    "path": "songs/11-ha-noi-run-run-heo-may.mp3",
+    "tags": [
+      "Tuấn Hiệp",
+      "nhạc Việt"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "xom-dem",
+    "name": "Xóm đêm - Thanh Ha's BackYard Jams",
+    "path": "songs/12-xom-dem.mp3",
+    "tags": [
+      "live acoustic",
+      "nhạc Việt"
+    ]
+  }
+]
