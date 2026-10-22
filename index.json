@@ -122,18 +122,19 @@
     "category": "song",
     "id": "lo-khen-nguoi-chet",
     "name": "13. Lỡ Khen Người Chết",
-    "path": "songs/L%E1%BB%A1%20Khen%20Ng%C6%B0%E1%BB%9Di%20Ch%E1%BB%83t.mp3",
+    "path": "truy%E1%BB%87n%20ma/L%E1%BB%A1%20Khen%20Ng%C6%B0%E1%BB%9Di%20Ch%E1%BB%83t.mp3",
     "tags": [
       "Lỡ Khen Người Chết",
       "Lỡ Khen Người Chểt",
-      "nhạc Việt"
+      "nhạc Việt",
+      "truyện ma"
     ]
   },
   {
     "category": "song",
     "id": "truyen-ma-nhap-trang",
     "name": "14. Truyện ma Nhập Tràng",
-    "path": "songs/ruy%E1%BB%87n%20ma%20Nh%E1%BA%ADp%20Tr%C3%A0ng.mp3",
+    "path": "truy%E1%BB%87n%20ma/ruy%E1%BB%87n%20ma%20Nh%E1%BA%ADp%20Tr%C3%A0ng.mp3",
     "tags": [
       "truyện ma",
       "Nhập Tràng"
