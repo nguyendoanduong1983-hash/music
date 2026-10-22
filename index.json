@@ -139,5 +139,55 @@
       "truyện ma",
       "Nhập Tràng"
     ]
+  },
+  {
+    "category": "song",
+    "id": "bong-ma-ben-cua",
+    "name": "15. Bóng Ma Bên Cửa",
+    "path": "truy%E1%BB%87n%20ma/B%C3%B3ng%20Ma%20B%C3%AAn%20C%E1%BB%ADa.mp3",
+    "tags": [
+      "truyện ma",
+      "Bóng Ma Bên Cửa"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "dem-trong-can-nha-hoang",
+    "name": "16. Đêm Trong Căn Nhà Hoang",
+    "path": "truy%E1%BB%87n%20ma/%C4%90%C3%AAm%20Trong%20C%C4%83n%20Nh%C3%A0%20Hoang.mp3",
+    "tags": [
+      "truyện ma",
+      "căn nhà hoang"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "hon-ve-trong-gio",
+    "name": "17. Hồn Về Trong Gió",
+    "path": "truy%E1%BB%87n%20ma/H%E1%BB%93n%20V%E1%BB%81%20Trong%20Gi%C3%B3.mp3",
+    "tags": [
+      "truyện ma",
+      "Hồn Về Trong Gió"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "tieng-goi-oan-hon",
+    "name": "18. Tiếng Gọi Oan Hồn",
+    "path": "truy%E1%BB%87n%20ma/Ti%E1%BA%BFng%20G%E1%BB%8Di%20Oan%20H%E1%BB%93n.mp3",
+    "tags": [
+      "truyện ma",
+      "oan hồn"
+    ]
+  },
+  {
+    "category": "song",
+    "id": "xac-ai-duoi-bon-cau",
+    "name": "19. Xác Ai Dưới Bồn Cầu",
+    "path": "truy%E1%BB%87n%20ma/X.%C3%A1c%20Ai%20D%C6%B0%E1%BB%9Bi%20B%E1%BB%93n%20C%E1%BA%A7u.mp3",
+    "tags": [
+      "truyện ma",
+      "Xác Ai Dưới Bồn Cầu"
+    ]
   }
 ]
