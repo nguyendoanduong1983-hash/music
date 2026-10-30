@@ -37,87 +37,89 @@ jobs:
           import urllib.parse
           import subprocess
           import re
+          from collections import defaultdict
 
           INDEX_FILE = "index.json"
-          existing_data = []
+          MAX_TOTAL_TRACKS = 80
 
-          if os.path.exists(INDEX_FILE):
-              try:
-                  with open(INDEX_FILE, "r", encoding="utf-8") as f:
-                      existing_data = json.load(f)
-              except Exception as e:
-                  print(f"Warning: Could not parse existing index.json: {e}")
-                  existing_data = []
+          SONG_NAME_MAP = {
+              "songs/01-the-luong-phuc-chinh.mp3": "Thê Lương - Phúc Chinh",
+              "songs/02-bai-ca-dao-dau-roi.mp3": "Bài ca dao đâu rồi - Quang Linh",
+              "songs/03-bien-noi-nho-va-em.mp3": "Biển nỗi nhớ và em - Đàm Vĩnh Hưng",
+              "songs/04-bong-do-cap-ngang-ben-song.mp3": "Bóng đò cập ngang bến sông",
+              "songs/05-buoc-chan-le-loi.mp3": "Bước chân lẻ loi - Đan Trường",
+              "songs/06-cam-on-mot-niem-dau.mp3": "Cảm ơn một niềm đau - Đàm Vĩnh Hưng",
+              "songs/07-cho-vua-long-em.mp3": "Cho vừa lòng em - Đàm Vĩnh Hưng",
+              "songs/08-lien-khuc-mai-lo-minh-xa-nhau.mp3": "LK Mai lỡ mình xa nhau",
+              "songs/09-mot-minh.mp3": "Một mình",
+              "songs/10-nhu-mot-giac-mo.mp3": "Như một giấc mơ (Xin đừng khóc)",
+              "songs/11-ha-noi-run-run-heo-may.mp3": "Hà Nội run run heo may - Tuấn Hiệp",
+              "songs/12-xom-dem.mp3": "Xóm đêm - Thanh Hà"
+          }
 
-          existing_map = {}
-          for item in existing_data:
-              path = item.get("path", "")
-              if path:
-                  existing_map[path] = item
-
-          # Lấy toàn bộ danh sách file trong git tree cực nhanh mà không cần tải file MP3
           out = subprocess.check_output(
               ["git", "-c", "core.quotePath=false", "ls-tree", "-r", "--name-only", "HEAD"],
               encoding="utf-8"
           )
           mp3_files = [line.strip() for line in out.splitlines() if line.strip().lower().endswith(".mp3")]
 
-          songs = []
+          by_folder = defaultdict(list)
           for rel_path in sorted(mp3_files):
               rel_path = rel_path.replace("\\", "/")
+              if re.search(r"\(\d+\)\.mp3$", rel_path, flags=re.IGNORECASE):
+                  continue
+              folder = rel_path.split("/", 1)[0] if "/" in rel_path else "songs"
+              by_folder[folder].append(rel_path)
+
+          folders = sorted(by_folder.keys())
+          selected_paths = []
+          round_idx = 0
+          while len(selected_paths) < MAX_TOTAL_TRACKS:
+              added_in_round = False
+              for f in folders:
+                  if round_idx < len(by_folder[f]):
+                      selected_paths.append((f, by_folder[f][round_idx]))
+                      added_in_round = True
+                      if len(selected_paths) >= MAX_TOTAL_TRACKS:
+                          break
+              if not added_in_round:
+                  break
+              round_idx += 1
+
+          selected_paths.sort(key=lambda x: (x[0], x[1]))
+
+          songs = []
+          tagged_folders = set()
+          for idx, (folder, rel_path) in enumerate(selected_paths, 1):
               encoded_path = urllib.parse.quote(rel_path, safe="/")
-
-              if "/" in rel_path:
-                  folder_name, file_name = rel_path.split("/", 1)
-                  # Nếu có thư mục con sâu hơn, lấy tên file cuối cùng
-                  file_name = os.path.basename(rel_path)
+              file_name = os.path.basename(rel_path)
+              if rel_path in SONG_NAME_MAP:
+                  clean_name = SONG_NAME_MAP[rel_path]
               else:
-                  folder_name = "songs"
-                  file_name = rel_path
+                  clean_name = os.path.splitext(file_name)[0].replace("_", " ").strip()
+                  clean_name = re.sub(r"\s*-\s*YouTube Music$", "", clean_name, flags=re.IGNORECASE)
+                  if len(clean_name) > 45:
+                      clean_name = clean_name[:45].strip()
 
-              lower_folder = folder_name.lower()
-              lower_file = file_name.lower()
-              if any(w in lower_folder or w in lower_file for w in ["truyen", "truyện", "kể chuyện", "story", "radio"]):
-                  category = "story"
-              else:
-                  category = "song"
+              lower_folder = folder.lower()
+              cat = "story" if any(w in lower_folder for w in ["truyen", "truyện", "kể chuyện", "story", "radio"]) else "song"
 
-              clean_name = os.path.splitext(file_name)[0].replace("_", " ").strip()
-              clean_name = re.sub(r"\s*-\s*YouTube Music$", "", clean_name, flags=re.IGNORECASE)
+              item = {
+                  "id": f"t{idx}",
+                  "name": clean_name,
+                  "category": cat,
+                  "path": encoded_path
+              }
+              if folder not in tagged_folders:
+                  item["tags"] = [folder]
+                  tagged_folders.add(folder)
 
-              # Giữ tên bài hát đã có trong index.json cũ (như thư mục songs/ không dấu)
-              if encoded_path in existing_map:
-                  old_item = existing_map[encoded_path]
-                  name = old_item.get("name") or old_item.get("title") or clean_name
-                  # Bỏ số thứ tự cũ ở đầu nếu có (VD: "13. Lỡ Khen Người Chết" -> "Lỡ Khen Người Chết")
-                  name = re.sub(r"^\d+\.\s*", "", name).strip()
-                  tags = old_item.get("tags", [])
-                  if folder_name.lower() not in [t.lower() for t in tags]:
-                      tags.append(folder_name)
-              else:
-                  name = clean_name
-                  tags = [folder_name]
-
-              songs.append({
-                  "id": "",
-                  "name": name,
-                  "category": category,
-                  "folder": folder_name,
-                  "path": encoded_path,
-                  "tags": tags
-              })
-
-          # Sắp xếp theo thư mục và tên bài
-          songs.sort(key=lambda x: (x.get("folder", ""), x.get("name", "")))
-
-          for idx, item in enumerate(songs, 1):
-              prefix = "story" if item.get("category") == "story" else "song"
-              item["id"] = f"{prefix}_{idx:03d}"
+              songs.append(item)
 
           with open(INDEX_FILE, "w", encoding="utf-8") as f:
-              json.dump(songs, f, ensure_ascii=False, indent=2)
+              json.dump(songs, f, ensure_ascii=False, separators=(",", ":"))
 
-          print(f"Successfully generated {INDEX_FILE} with {len(songs)} tracks.")
+          print(f"Successfully generated {INDEX_FILE} with {len(songs)} tracks across {len(folders)} folders.")
           EOF
 
       - name: Commit and Push changes
