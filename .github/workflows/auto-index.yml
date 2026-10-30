@@ -40,7 +40,7 @@ jobs:
           from collections import defaultdict
 
           INDEX_FILE = "index.json"
-          MAX_TOTAL_TRACKS = 68
+          MAX_TOTAL_TRACKS = 5000
 
           SONG_NAME_MAP = {
               "songs/01-the-luong-phuc-chinh.mp3": "Thê Lương - Phúc Chinh",
@@ -66,7 +66,7 @@ jobs:
           by_folder = defaultdict(list)
           for rel_path in sorted(mp3_files):
               rel_path = rel_path.replace("\\", "/")
-              if re.search(r"\(\d+\)\.mp3$", rel_path, flags=re.IGNORECASE):
+              if False:
                   continue
               folder = rel_path.split("/", 1)[0] if "/" in rel_path else "songs"
               by_folder[folder].append(rel_path)
@@ -98,8 +98,8 @@ jobs:
               else:
                   clean_name = os.path.splitext(file_name)[0].replace("_", " ").strip()
                   clean_name = re.sub(r"\s*-\s*YouTube Music$", "", clean_name, flags=re.IGNORECASE)
-                  if len(clean_name) > 28:
-                      clean_name = clean_name[:28].strip()
+                  if len(clean_name) > 55:
+                      clean_name = clean_name[:55].strip()
 
               lower_folder = folder.lower()
               cat = "story" if any(w in lower_folder for w in ["truyen", "truyện", "kể chuyện", "story", "radio"]) else "song"
