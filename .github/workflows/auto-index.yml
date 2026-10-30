@@ -7,9 +7,8 @@ on:
       - master
     paths-ignore:
       - 'index.json'
-      - '.github/**'
       - 'README.md'
-  workflow_dispatch: # Cho phép bấm nút chạy thủ công bất cứ lúc nào
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,19 +17,17 @@ jobs:
   update-index:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repository (fast metadata only)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout: |
+            .github
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          pip install mutagen
 
       - name: Generate index.json
         run: |
@@ -38,13 +35,12 @@ jobs:
           import os
           import json
           import urllib.parse
+          import subprocess
           import re
-          from mutagen.easyid3 import EasyID3
 
           INDEX_FILE = "index.json"
           existing_data = []
 
-          # Đọc dữ liệu cũ nếu có để giữ nguyên các bài đã tùy biến
           if os.path.exists(INDEX_FILE):
               try:
                   with open(INDEX_FILE, "r", encoding="utf-8") as f:
@@ -59,91 +55,65 @@ jobs:
               if path:
                   existing_map[path] = item
 
+          # Lấy toàn bộ danh sách file trong git tree cực nhanh mà không cần tải file MP3
+          out = subprocess.check_output(
+              ["git", "-c", "core.quotePath=false", "ls-tree", "-r", "--name-only", "HEAD"],
+              encoding="utf-8"
+          )
+          mp3_files = [line.strip() for line in out.splitlines() if line.strip().lower().endswith(".mp3")]
+
           songs = []
-          counter = 1
+          for rel_path in sorted(mp3_files):
+              rel_path = rel_path.replace("\\", "/")
+              encoded_path = urllib.parse.quote(rel_path, safe="/")
 
-          # Duyệt tất cả thư mục tìm file .mp3
-          for root, dirs, files in os.walk("."):
-              # Bỏ qua thư mục ẩn của git và github
-              if ".git" in root or ".github" in root:
-                  continue
+              if "/" in rel_path:
+                  folder_name, file_name = rel_path.split("/", 1)
+                  # Nếu có thư mục con sâu hơn, lấy tên file cuối cùng
+                  file_name = os.path.basename(rel_path)
+              else:
+                  folder_name = "songs"
+                  file_name = rel_path
 
-              for file in sorted(files):
-                  if not file.lower().endswith(".mp3"):
-                      continue
+              lower_folder = folder_name.lower()
+              lower_file = file_name.lower()
+              if any(w in lower_folder or w in lower_file for w in ["truyen", "truyện", "kể chuyện", "story", "radio"]):
+                  category = "story"
+              else:
+                  category = "song"
 
-                  rel_dir = os.path.relpath(root, ".")
-                  rel_path = file if rel_dir == "." else os.path.join(rel_dir, file)
-                  rel_path = rel_path.replace("\\", "/") # Chuẩn hóa slash
+              clean_name = os.path.splitext(file_name)[0].replace("_", " ").strip()
+              clean_name = re.sub(r"\s*-\s*YouTube Music$", "", clean_name, flags=re.IGNORECASE)
 
-                  # URL encode đường dẫn (giữ nguyên '/')
-                  encoded_path = urllib.parse.quote(rel_path, safe="/")
+              # Giữ tên bài hát đã có trong index.json cũ (như thư mục songs/ không dấu)
+              if encoded_path in existing_map:
+                  old_item = existing_map[encoded_path]
+                  name = old_item.get("name") or old_item.get("title") or clean_name
+                  # Bỏ số thứ tự cũ ở đầu nếu có (VD: "13. Lỡ Khen Người Chết" -> "Lỡ Khen Người Chết")
+                  name = re.sub(r"^\d+\.\s*", "", name).strip()
+                  tags = old_item.get("tags", [])
+                  if folder_name.lower() not in [t.lower() for t in tags]:
+                      tags.append(folder_name)
+              else:
+                  name = clean_name
+                  tags = [folder_name]
 
-                  # Xác định thư mục cha
-                  folder_name = "root" if rel_dir == "." else rel_dir.replace("\\", "/")
+              songs.append({
+                  "id": "",
+                  "name": name,
+                  "category": category,
+                  "folder": folder_name,
+                  "path": encoded_path,
+                  "tags": tags
+              })
 
-                  # Xác định thể loại
-                  lower_folder = folder_name.lower()
-                  lower_file = file.lower()
-                  if any(w in lower_folder or w in lower_file for w in ["truyen", "truyện", "kể chuyện", "story"]):
-                      category = "story"
-                  else:
-                      category = "song"
+          # Sắp xếp theo thư mục và tên bài
+          songs.sort(key=lambda x: (x.get("folder", ""), x.get("name", "")))
 
-                  # Nếu bài đã có trong index.json cũ, tái sử dụng metadata
-                  if encoded_path in existing_map:
-                      item = existing_map[encoded_path].copy()
-                      item["folder"] = folder_name
-                      item["category"] = category
-                      songs.append(item)
-                      continue
-
-                  # Bài mới: Đọc Title và Artist từ file MP3 hoặc lấy tên file
-                  full_file_path = os.path.join(root, file)
-                  clean_name = os.path.splitext(file)[0].replace("_", " ").strip()
-                  title = clean_name
-                  artist = "Đang cập nhật"
-
-                  try:
-                      audio = EasyID3(full_file_path)
-                      if "title" in audio and audio["title"][0].strip():
-                          title = audio["title"][0].strip()
-                      if "artist" in audio and audio["artist"][0].strip():
-                          artist = audio["artist"][0].strip()
-                  except Exception:
-                      # Nếu file không có EasyID3, thử tách Tên - Ca sĩ từ tên file nếu có dấu gạch ngang
-                      if " - " in clean_name:
-                          parts = clean_name.split(" - ", 1)
-                          artist = parts[0].strip()
-                          title = parts[1].strip()
-
-                  # Tạo tag tìm kiếm giọng nói
-                  tags = [folder_name.lower()]
-                  for word in re.split(r'[\s\-_]+', title.lower()):
-                      if len(word) > 1 and word not in tags:
-                          tags.append(word)
-
-                  item = {
-                      "id": f"{category}_{counter:03d}",
-                      "title": title,
-                      "artist": artist,
-                      "category": category,
-                      "folder": folder_name,
-                      "path": encoded_path,
-                      "tags": tags
-                  }
-                  counter += 1
-                  songs.append(item)
-
-          # Sắp xếp danh sách theo thư mục, sau đó theo tên bài
-          songs.sort(key=lambda x: (x.get("folder", ""), x.get("title", "")))
-
-          # Đánh lại ID theo thứ tự đẹp mắt
           for idx, item in enumerate(songs, 1):
               prefix = "story" if item.get("category") == "story" else "song"
               item["id"] = f"{prefix}_{idx:03d}"
 
-          # Ghi ra index.json định dạng UTF-8
           with open(INDEX_FILE, "w", encoding="utf-8") as f:
               json.dump(songs, f, ensure_ascii=False, indent=2)
 
