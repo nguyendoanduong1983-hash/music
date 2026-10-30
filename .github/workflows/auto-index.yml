@@ -40,7 +40,7 @@ jobs:
           from collections import defaultdict
 
           INDEX_FILE = "index.json"
-          MAX_TOTAL_TRACKS = 80
+          MAX_TOTAL_TRACKS = 60
 
           SONG_NAME_MAP = {
               "songs/01-the-luong-phuc-chinh.mp3": "Thê Lương - Phúc Chinh",
